@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smooth Snake Game</title>
+    <title>Slower Snake Game</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -50,6 +50,8 @@
         let food = { x: getRandomInt(0, cols), y: getRandomInt(0, rows) };
         let isGameOver = false;
 
+        const speed = 200; // Slower speed in milliseconds
+
         const appleImage = new Image();
         appleImage.src = 'apple.png'; // Add your apple .png file to the same folder as this HTML file
 
@@ -62,7 +64,7 @@
             drawSnake();
             checkCollision();
 
-            setTimeout(gameLoop, 100); // Fixed speed
+            setTimeout(gameLoop, speed); // Updated slower speed
         }
 
         function clearCanvas() {
