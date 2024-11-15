@@ -1,1 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🔴 Click Game</h1>
+        <p>Click the circle as many times as you can!</p>
+        <div id="circle"></div>
+        <p>Clicks: <span id="click-count">0</span></p>
+        <a href="index.html" class="back-link">⬅ Back to Hub</a>
+    </div>
+
+    <script>
+        const circle = document.getElementById("circle");
+        const clickCount = document.getElementById("click-count");
+        let count = 0;
+
+        circle.addEventListener("click", () => {
+            count++;
+            clickCount.textContent = count;
+        });
+    </script>
+</body>
+</html>
 
