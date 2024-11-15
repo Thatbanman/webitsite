@@ -3,167 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slower Snake Game</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: linear-gradient(135deg, #282c34, #61dafb);
-            overflow: hidden;
-        }
-
-        canvas {
-            background: #222;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-            border-radius: 8px;
-        }
-
-        #game-over {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 2rem;
-            display: none;
-        }
-    </style>
+    <title>Game Hub</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <canvas id="game" width="400" height="400"></canvas>
-    <div id="game-over">💥 Game Over! Press R to Restart</div>
-    <script>
-        const canvas = document.getElementById("game");
-        const ctx = canvas.getContext("2d");
-
-        const tileSize = 20;
-        const rows = canvas.height / tileSize;
-        const cols = canvas.width / tileSize;
-
-        let snake = [{ x: 10, y: 10 }];
-        let direction = { x: 1, y: 0 };
-        let nextDirection = { x: 1, y: 0 };
-        let food = { x: getRandomInt(0, cols), y: getRandomInt(0, rows) };
-        let isGameOver = false;
-
-        const speed = 200; // Slower speed in milliseconds
-
-        const appleImage = new Image();
-        appleImage.src = 'apple.png'; // Add your apple .png file to the same folder as this HTML file
-
-        function gameLoop() {
-            if (isGameOver) return;
-
-            clearCanvas();
-            drawFood();
-            moveSnake();
-            drawSnake();
-            checkCollision();
-
-            setTimeout(gameLoop, speed); // Updated slower speed
-        }
-
-        function clearCanvas() {
-            ctx.fillStyle = "#222";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-
-        function drawFood() {
-            ctx.drawImage(appleImage, food.x * tileSize, food.y * tileSize, tileSize, tileSize);
-        }
-
-        function moveSnake() {
-            const head = { 
-                x: snake[0].x + nextDirection.x, 
-                y: snake[0].y + nextDirection.y 
-            };
-            snake.unshift(head); // Add new head
-
-            // Check if the snake eats the food
-            if (head.x === food.x && head.y === food.y) {
-                food = { x: getRandomInt(0, cols), y: getRandomInt(0, rows) }; // Reposition food
-            } else {
-                snake.pop(); // Remove tail if not eating
-            }
-
-            direction = nextDirection; // Update direction
-        }
-
-        function drawSnake() {
-            snake.forEach((segment, index) => {
-                ctx.fillStyle = index === 0 ? "#2ed573" : "#61dafb"; // Head and body color
-                ctx.beginPath();
-                ctx.arc(
-                    segment.x * tileSize + tileSize / 2,
-                    segment.y * tileSize + tileSize / 2,
-                    tileSize / 2.2,
-                    0,
-                    Math.PI * 2
-                );
-                ctx.fill();
-            });
-        }
-
-        function checkCollision() {
-            const head = snake[0];
-
-            // Check wall collisions
-            if (head.x < 0 || head.y < 0 || head.x >= cols || head.y >= rows) {
-                triggerGameOver();
-            }
-
-            // Check self-collision
-            for (let i = 1; i < snake.length; i++) {
-                if (head.x === snake[i].x && head.y === snake[i].y) {
-                    triggerGameOver();
-                }
-            }
-        }
-
-        function triggerGameOver() {
-            isGameOver = true;
-            document.getElementById("game-over").style.display = "block";
-        }
-
-        function getRandomInt(min, max) {
-            return Math.floor(Math.random() * (max - min)) + min;
-        }
-
-        document.addEventListener("keydown", (e) => {
-            switch (e.key) {
-                case "ArrowUp":
-                    if (direction.y === 0) nextDirection = { x: 0, y: -1 };
-                    break;
-                case "ArrowDown":
-                    if (direction.y === 0) nextDirection = { x: 0, y: 1 };
-                    break;
-                case "ArrowLeft":
-                    if (direction.x === 0) nextDirection = { x: -1, y: 0 };
-                    break;
-                case "ArrowRight":
-                    if (direction.x === 0) nextDirection = { x: 1, y: 0 };
-                    break;
-                case "r":
-                    if (isGameOver) restartGame();
-                    break;
-            }
-        });
-
-        function restartGame() {
-            snake = [{ x: 10, y: 10 }];
-            direction = { x: 1, y: 0 };
-            nextDirection = { x: 1, y: 0 };
-            food = { x: getRandomInt(0, cols), y: getRandomInt(0, rows) };
-            isGameOver = false;
-            document.getElementById("game-over").style.display = "none";
-            gameLoop();
-        }
-
-        gameLoop();
-    </script>
+    <div class="container">
+        <h1>Game Hub</h1>
+        <p>Choose a game to play:</p>
+        <ul>
+            <li><a href="snake.html">🐍 Snake Game</a></li>
+            <li><a href="circle.html">🔴 Click Game</a></li>
+        </ul>
+    </div>
 </body>
 </html>
