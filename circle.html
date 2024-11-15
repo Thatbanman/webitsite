@@ -16,15 +16,22 @@
     </div>
 
     <script>
-        const circle = document.getElementById("circle");
-        const clickCount = document.getElementById("click-count");
+        // JavaScript for Click Game
+        const circle = document.getElementById("circle"); // Circle element
+        const clickCount = document.getElementById("click-count"); // Counter display element
+
         let count = 0;
 
-        circle.addEventListener("click", () => {
-            count++;
-            clickCount.textContent = count;
-        });
+        // Ensure the circle element exists
+        if (circle) {
+            // Add a click event listener to the circle
+            circle.addEventListener("click", () => {
+                count++; // Increment count
+                clickCount.textContent = count; // Update the display
+            });
+        } else {
+            console.error("Circle element not found!");
+        }
     </script>
 </body>
 </html>
-
