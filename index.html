@@ -53,8 +53,6 @@
         const appleImage = new Image();
         appleImage.src = 'apple.png'; // Add your apple .png file to the same folder as this HTML file
 
-        let animationFrameId;
-
         function gameLoop() {
             if (isGameOver) return;
 
@@ -64,7 +62,7 @@
             drawSnake();
             checkCollision();
 
-            animationFrameId = requestAnimationFrame(gameLoop);
+            setTimeout(gameLoop, 100); // Fixed speed
         }
 
         function clearCanvas() {
@@ -77,17 +75,14 @@
         }
 
         function moveSnake() {
-            const head = snake[0];
-            const newHead = { 
-                x: head.x + nextDirection.x, 
-                y: head.y + nextDirection.y 
+            const head = { 
+                x: snake[0].x + nextDirection.x, 
+                y: snake[0].y + nextDirection.y 
             };
-
-            snake.unshift(newHead); // Add new head
-            const headRounded = { x: Math.round(newHead.x), y: Math.round(newHead.y) };
+            snake.unshift(head); // Add new head
 
             // Check if the snake eats the food
-            if (headRounded.x === food.x && headRounded.y === food.y) {
+            if (head.x === food.x && head.y === food.y) {
                 food = { x: getRandomInt(0, cols), y: getRandomInt(0, rows) }; // Reposition food
             } else {
                 snake.pop(); // Remove tail if not eating
@@ -130,7 +125,6 @@
         function triggerGameOver() {
             isGameOver = true;
             document.getElementById("game-over").style.display = "block";
-            cancelAnimationFrame(animationFrameId);
         }
 
         function getRandomInt(min, max) {
