@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Boxing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        #game {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Multiplayer Boxing Game</h1>
+    <button id="playButton">Play</button>
+
+    <div id="game">
+        <p id="status">Game started! Make your move:</p>
+        <button id="hitButton">Hit</button>
+        <button id="weaveButton">Weave</button>
+        <p id="result"></p>
+    </div>
+
+    <script>
+        const playButton = document.getElementById('playButton');
+        const gameDiv = document.getElementById('game');
+        const hitButton = document.getElementById('hitButton');
+        const weaveButton = document.getElementById('weaveButton');
+        const status = document.getElementById('status');
+        const result = document.getElementById('result');
+
+        const ws = new WebSocket('https://glitch.com/edit/#!/festive-tabby-muscle');
+        let lives = 3;
+        let opponentLives = 3;
+
+        playButton.addEventListener('click', () => {
+            ws.send(JSON.stringify({ type: 'play' }));
+            playButton.disabled = true;
+            playButton.textContent = 'Waiting for opponent...';
+        });
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+
+            if (data.type === 'waiting') {
+                status.textContent = 'Waiting for an opponent...';
+            } else if (data.type === 'start') {
+                gameDiv.style.display = 'block';
+                playButton.style.display = 'none';
+                status.textContent = 'Game started! Make your move:';
+            } else if (data.type === 'move') {
+                const opponentMove = data.move;
+
+                if (opponentMove === 'hit' && playerMove === 'weave') {
+                    opponentLives--;
+                    result.textContent = `You weaved! Opponent has ${opponentLives} lives left.`;
+                } else if (opponentMove === 'weave' && playerMove === 'hit') {
+                    lives--;
+                    result.textContent = `Opponent weaved! You have ${lives} lives left.`;
+                } else if (opponentMove === 'hit' && playerMove === 'hit') {
+                    lives--;
+                    opponentLives--;
+                    result.textContent = `Both attacked! You: ${lives} lives, Opponent: ${opponentLives} lives.`;
+                }
+
+                if (lives <= 0 || opponentLives <= 0) {
+                    if (lives > opponentLives) {
+                        result.textContent = 'You win!';
+                    } else if (opponentLives > lives) {
+                        result.textContent = 'You lose!';
+                    } else {
+                        result.textContent = 'It\'s a draw!';
+                    }
+                    gameDiv.style.display = 'none';
+                }
+            } else if (data.type === 'opponent_left') {
+                result.textContent = 'Opponent left the game.';
+                gameDiv.style.display = 'none';
+            }
+        };
+
+        let playerMove = '';
+
+        hitButton.addEventListener('click', () => {
+            playerMove = 'hit';
+            ws.send(JSON.stringify({ type: 'move', move: 'hit' }));
+        });
+
+        weaveButton.addEventListener('click', () => {
+            playerMove = 'weave';
+            ws.send(JSON.stringify({ type: 'move', move: 'weave' }));
+        });
+    </script>
+</body>
+</html>
