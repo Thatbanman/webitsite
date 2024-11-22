@@ -246,43 +246,18 @@
       return count;
     }
 
-    function revealCell(cell, cellEl) {
-      if (cell.revealed || cell.flagged) return;
-
-      cell.revealed = true;
-      cellEl.classList.add('revealed');
-
-      if (cell.adjacentMines > 0) {
-        cellEl.textContent = cell.adjacentMines;
-      } else {
-        revealAdjacentCells(cell);
-      }
-    }
-
-    function revealAdjacentCells(cell) {
-      const directions = [
-        [-1, -1], [-1, 0], [-1, 1],
-        [0, -1],           [0, 1],
-        [1, -1], [1, 0], [1, 1],
-      ];
-
-      directions.forEach(([dx, dy]) => {
-        const newRow = cell.row + dx;
-        const newCol = cell.col + dy;
-        if (newRow >= 0 && newRow < config.rows && newCol >= 0 && newCol < config.cols) {
-          const adjacentCell = board[newRow][newCol];
-          const cellEl = document.querySelector(`[data-row='${newRow}'][data-col='${newCol}']`);
-          revealCell(adjacentCell, cellEl);
+    function revealAllCells() {
+      board.flat().forEach((cell) => {
+        const cellEl = document.querySelector(`[data-row='${cell.row}'][data-col='${cell.col}']`);
+        cell.revealed = true;
+        cellEl.classList.add('revealed');
+        if (cell.mine) {
+          cellEl.classList.add('mine');
+          cellEl.textContent = "💣";
+        } else if (cell.adjacentMines > 0) {
+          cellEl.textContent = cell.adjacentMines;
         }
       });
-    }
-
-    function toggleFlag(cell, cellEl) {
-      if (cell.revealed || gameOver) return;
-
-      cell.flagged = !cell.flagged;
-      cellEl.classList.toggle('flagged');
-      cellEl.textContent = cell.flagged ? "🚩" : "";
     }
 
     function checkWin() {
@@ -295,25 +270,18 @@
         alert('Congratulations, You Win!');
       } else {
         alert('Game Over. Try Again!');
-        board.flat().forEach((cell) => {
-          if (cell.mine) {
-            const cellEl = document.querySelector(`[data-row='${cell.row}'][data-col='${cell.col}']`);
-            cellEl.classList.add('mine');
-            cellEl.textContent = "💣";
-          }
-        });
       }
     }
 
     cheatCodeInput.addEventListener('input', () => {
       if (cheatCodeInput.value === "Im A Cheater") {
         alert("Congratulations, You Win!");
+        revealAllCells();
         endGame(true);
       }
     });
 
     restartBtn.addEventListener('click', () => initBoard());
-
     initBoard();
   </script>
 </body>
