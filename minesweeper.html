@@ -26,13 +26,19 @@
       text-align: center;
       line-height: 30px;
       cursor: pointer;
+      font-weight: bold;
     }
     .cell.revealed {
       background-color: #eee;
+      border-color: #bbb;
       cursor: default;
     }
     .cell.mine {
       background-color: red;
+      color: white;
+    }
+    .cell.flagged {
+      background-color: #4caf50;
     }
   </style>
 </head>
@@ -40,8 +46,8 @@
   <h1>Minesweeper</h1>
   <div id="board" class="board"></div>
   <script>
-    const size = 8;
-    const mines = 10;
+    const size = 10; // Size of the grid (10x10)
+    const mines = 20; // Number of mines
     const board = [];
     const boardEl = document.getElementById('board');
     boardEl.style.gridTemplateRows = `repeat(${size}, 1fr)`;
@@ -51,17 +57,26 @@
       for (let row = 0; row < size; row++) {
         const rowArray = [];
         for (let col = 0; col < size; col++) {
-          const cell = { mine: false, revealed: false, row, col };
+          const cell = { mine: false, revealed: false, flagged: false, row, col, adjacentMines: 0 };
           rowArray.push(cell);
 
           const cellEl = document.createElement('div');
           cellEl.classList.add('cell');
+          cellEl.dataset.row = row;
+          cellEl.dataset.col = col;
+
           cellEl.addEventListener('click', () => revealCell(cell, cellEl));
+          cellEl.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            toggleFlag(cell, cellEl);
+          });
+
           boardEl.appendChild(cellEl);
         }
         board.push(rowArray);
       }
       placeMines();
+      calculateAdjacency();
     }
 
     function placeMines() {
@@ -76,15 +91,76 @@
       }
     }
 
+    function calculateAdjacency() {
+      for (let row = 0; row < size; row++) {
+        for (let col = 0; col < size; col++) {
+          if (!board[row][col].mine) {
+            board[row][col].adjacentMines = countAdjacentMines(row, col);
+          }
+        }
+      }
+    }
+
+    function countAdjacentMines(row, col) {
+      const directions = [
+        [-1, -1], [-1, 0], [-1, 1],
+        [0, -1],           [0, 1],
+        [1, -1], [1, 0], [1, 1],
+      ];
+      let count = 0;
+      directions.forEach(([dx, dy]) => {
+        const newRow = row + dx;
+        const newCol = col + dy;
+        if (newRow >= 0 && newRow < size && newCol >= 0 && newCol < size && board[newRow][newCol].mine) {
+          count++;
+        }
+      });
+      return count;
+    }
+
     function revealCell(cell, cellEl) {
-      if (cell.revealed) return;
+      if (cell.revealed || cell.flagged) return;
+
       cell.revealed = true;
       cellEl.classList.add('revealed');
 
       if (cell.mine) {
         cellEl.classList.add('mine');
+        cellEl.textContent = "💣";
         alert('Game Over!');
+        return;
       }
+
+      if (cell.adjacentMines > 0) {
+        cellEl.textContent = cell.adjacentMines;
+      } else {
+        revealAdjacentCells(cell);
+      }
+    }
+
+    function revealAdjacentCells(cell) {
+      const directions = [
+        [-1, -1], [-1, 0], [-1, 1],
+        [0, -1],           [0, 1],
+        [1, -1], [1, 0], [1, 1],
+      ];
+      directions.forEach(([dx, dy]) => {
+        const newRow = cell.row + dx;
+        const newCol = cell.col + dy;
+        if (newRow >= 0 && newRow < size && newCol >= 0 && newCol < size) {
+          const adjacentCell = board[newRow][newCol];
+          if (!adjacentCell.revealed && !adjacentCell.mine) {
+            const cellEl = document.querySelector(`[data-row='${newRow}'][data-col='${newCol}']`);
+            revealCell(adjacentCell, cellEl);
+          }
+        }
+      });
+    }
+
+    function toggleFlag(cell, cellEl) {
+      if (cell.revealed) return;
+      cell.flagged = !cell.flagged;
+      cellEl.classList.toggle('flagged');
     }
 
     initBoard();
