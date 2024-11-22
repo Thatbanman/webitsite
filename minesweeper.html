@@ -120,29 +120,26 @@
     let firstClick = true;
     let currentMode = 'easy';
     let config = sizeOptions[currentMode];
+    let gameStarted = false;
     const boardEl = document.getElementById('board');
     const restartBtn = document.getElementById('restart');
     const cheatCodeInput = document.getElementById('cheatCode');
 
+    // Set the game mode
     function setMode(mode) {
       currentMode = mode;
       config = sizeOptions[mode];
       initBoard();
     }
 
+    // Initialize the game board
     function initBoard() {
       firstClick = true;
       gameOver = false;
+      gameStarted = false;
       board = [];
       boardEl.innerHTML = '';
       restartBtn.style.display = currentMode === 'impossible' ? 'none' : 'block';
-
-      if (currentMode === 'impossible') {
-        boardEl.style.gridTemplateRows = `repeat(50, 1fr)`;
-        boardEl.style.gridTemplateColumns = `repeat(50, 1fr)`;
-        generateInfiniteGrid();
-        return;
-      }
 
       boardEl.style.gridTemplateRows = `repeat(${config.rows}, 1fr)`;
       boardEl.style.gridTemplateColumns = `repeat(${config.cols}, 1fr)`;
@@ -160,6 +157,7 @@
       }
     }
 
+    // Create a cell element
     function createCellElement(cell) {
       const cellEl = document.createElement('div');
       cellEl.classList.add('cell');
@@ -169,119 +167,67 @@
       cellEl.addEventListener('click', () => handleCellClick(cell, cellEl));
       cellEl.addEventListener('contextmenu', (e) => {
         e.preventDefault();
-        toggleFlag(cell, cellEl);
+        handleRightClick(cell, cellEl);
       });
 
       return cellEl;
     }
 
+    // Handle left-click on a cell
     function handleCellClick(cell, cellEl) {
       if (gameOver || cell.revealed || cell.flagged) return;
 
-      if (firstClick) {
-        firstClick = false;
-        if (currentMode !== 'impossible') {
-          generateMines(cell);
-          calculateAdjacency();
-        }
-      }
+      cell.revealed = true;
+      cellEl.classList.add('revealed');
 
       if (cell.mine) {
-        cell.revealed = true;
         cellEl.classList.add('mine');
-        cellEl.textContent = "💣";
-        endGame(false);
-        return;
-      }
-
-      revealCell(cell, cellEl);
-
-      if (checkWin()) {
-        endGame(true);
-      }
-    }
-
-    function generateMines(firstCell) {
-      let placed = 0;
-      while (placed < config.mines) {
-        const r = Math.floor(Math.random() * config.rows);
-        const c = Math.floor(Math.random() * config.cols);
-        const cell = board[r][c];
-
-        const isSafeZone = Math.abs(r - firstCell.row) <= 1 && Math.abs(c - firstCell.col) <= 1;
-
-        if (!cell.mine && !isSafeZone) {
-          cell.mine = true;
-          placed++;
-        }
-      }
-    }
-
-    function calculateAdjacency() {
-      for (let row = 0; row < config.rows; row++) {
-        for (let col = 0; col < config.cols; col++) {
-          if (!board[row][col].mine) {
-            board[row][col].adjacentMines = countAdjacentMines(row, col);
-          }
-        }
-      }
-    }
-
-    function countAdjacentMines(row, col) {
-      const directions = [
-        [-1, -1], [-1, 0], [-1, 1],
-        [0, -1],           [0, 1],
-        [1, -1], [1, 0], [1, 1],
-      ];
-      let count = 0;
-
-      directions.forEach(([dx, dy]) => {
-        const newRow = row + dx;
-        const newCol = col + dy;
-        if (newRow >= 0 && newRow < config.rows && newCol >= 0 && newCol < config.cols && board[newRow][newCol].mine) {
-          count++;
-        }
-      });
-
-      return count;
-    }
-
-    function revealAllCells() {
-      board.flat().forEach((cell) => {
-        const cellEl = document.querySelector(`[data-row='${cell.row}'][data-col='${cell.col}']`);
-        cell.revealed = true;
-        cellEl.classList.add('revealed');
-        if (cell.mine) {
-          cellEl.classList.add('mine');
-          cellEl.textContent = "💣";
-        } else if (cell.adjacentMines > 0) {
-          cellEl.textContent = cell.adjacentMines;
-        }
-      });
-    }
-
-    function checkWin() {
-      return board.flat().every((cell) => cell.mine || cell.revealed);
-    }
-
-    function endGame(win) {
-      gameOver = true;
-      if (win) {
-        alert('Congratulations, You Win!');
+        gameOver = true;
+        alert("Game Over! You hit a mine.");
       } else {
-        alert('Game Over. Try Again!');
+        revealAdjacentCells(cell);
       }
     }
 
-    cheatCodeInput.addEventListener('input', () => {
+    // Handle right-click to flag a cell
+    function handleRightClick(cell, cellEl) {
+      if (gameOver || cell.revealed) return;
+
+      cell.flagged = !cell.flagged;
+      if (cell.flagged) {
+        cellEl.classList.add('flagged');
+      } else {
+        cellEl.classList.remove('flagged');
+      }
+    }
+
+    // Reveal adjacent cells if the cell is empty
+    function revealAdjacentCells(cell) {
+      // Add logic to reveal adjacent cells
+    }
+
+    // Cheat code to reveal all mines
+    cheatCodeInput.addEventListener('input', function() {
       if (cheatCodeInput.value === "Im A Cheater") {
-        alert("Congratulations, You Win!");
-        revealAllCells();
-        endGame(true);
+        alert("Cheat Code Accepted! Revealing all mines.");
+        revealAllMines();
+        cheatCodeInput.disabled = true;  // Disable the input after using the cheat code
       }
     });
 
-    restartBtn.addEventListener('click', () => initBoard());
+    // Reveal all mines when cheat code is entered
+    function revealAllMines() {
+      board.forEach(row => {
+        row.forEach(cell => {
+          if (cell.mine) {
+            const cellEl = boardEl.querySelector(`[data-row="${cell.row}"][data-col="${cell.col}"]`);
+            cellEl.classList.add('mine');
+          }
+        });
+      });
+    }
+
+    // Initialize the board on page load
     initBoard();
   </script>
 </body>
