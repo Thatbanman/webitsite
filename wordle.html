@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Wordle</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #282c34;
+      color: #ffffff;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #61dafb;
+    }
+    input, button {
+      margin: 10px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    .game-board {
+      display: grid;
+      grid-template-rows: repeat(5, 50px);
+      grid-gap: 5px;
+      margin: 20px auto;
+      max-width: 300px;
+    }
+    .row {
+      display: flex;
+      justify-content: center;
+    }
+    .cell {
+      width: 50px;
+      height: 50px;
+      margin: 2px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: white;
+      background-color: #444;
+      border: 2px solid #555;
+    }
+    .cell.correct {
+      background-color: #6aaa64; /* Green */
+    }
+    .cell.misplaced {
+      background-color: #c9b458; /* Yellow */
+    }
+    .cell.wrong {
+      background-color: #787c7e; /* Gray */
+    }
+    .message {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Custom Wordle</h1>
+  <p>Enter a comma-separated list of words:</p>
+  <input type="text" id="word-list" placeholder="e.g., apple, chair, house">
+  <button onclick="startGame()">Start Game</button>
+  <div id="game-container" style="display: none;">
+    <div class="game-board" id="board"></div>
+    <input type="text" id="guess-input" maxlength="5" placeholder="Enter your guess">
+    <button onclick="submitGuess()">Submit Guess</button>
+    <p class="message" id="message"></p>
+  </div>
+
+  <script>
+    let targetWord = '';
+    let guesses = [];
+    let maxGuesses = 5;
+
+    function startGame() {
+      const input = document.getElementById('word-list').value.trim();
+      const words = input.split(',').map(word => word.trim().toLowerCase()).filter(word => word.length === 5);
+
+      if (words.length === 0) {
+        alert('Please enter valid 5-letter words separated by commas.');
+        return;
+      }
+
+      targetWord = words[Math.floor(Math.random() * words.length)];
+      guesses = [];
+      document.getElementById('word-list').style.display = 'none';
+      document.querySelector('button[onclick="startGame()"]').style.display = 'none';
+      document.getElementById('game-container').style.display = 'block';
+      createBoard();
+    }
+
+    function createBoard() {
+      const board = document.getElementById('board');
+      board.innerHTML = '';
+      for (let i = 0; i < maxGuesses; i++) {
+        const row = document.createElement('div');
+        row.className = 'row';
+        for (let j = 0; j < 5; j++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          row.appendChild(cell);
+        }
+        board.appendChild(row);
+      }
+    }
+
+    function submitGuess() {
+      const input = document.getElementById('guess-input');
+      const guess = input.value.trim().toLowerCase();
+
+      if (guess.length !== 5) {
+        alert('Please enter a 5-letter word.');
+        return;
+      }
+
+      if (guesses.length >= maxGuesses) {
+        alert('Game over! Restart to play again.');
+        return;
+      }
+
+      guesses.push(guess);
+      updateBoard(guess);
+
+      if (guess === targetWord) {
+        endGame(true);
+        return;
+      }
+
+      if (guesses.length === maxGuesses) {
+        endGame(false);
+        return;
+      }
+
+      input.value = '';
+    }
+
+    function updateBoard(guess) {
+      const board = document.getElementById('board');
+      const row = board.children[guesses.length - 1];
+      const targetLetters = targetWord.split('');
+
+      for (let i = 0; i < 5; i++) {
+        const cell = row.children[i];
+        cell.textContent = guess[i];
+        if (guess[i] === targetLetters[i]) {
+          cell.classList.add('correct');
+          targetLetters[i] = null;
+        } else if (targetLetters.includes(guess[i])) {
+          cell.classList.add('misplaced');
+          targetLetters[targetLetters.indexOf(guess[i])] = null;
+        } else {
+          cell.classList.add('wrong');
+        }
+      }
+    }
+
+    function endGame(win) {
+      const message = document.getElementById('message');
+      const input = document.getElementById('guess-input');
+      const button = document.querySelector('button[onclick="submitGuess()"]');
+
+      input.disabled = true;
+      button.disabled = true;
+
+      if (win) {
+        message.textContent = `Congratulations! You guessed the word "${targetWord}".`;
+      } else {
+        message.textContent = `Game over! The word was "${targetWord}".`;
+      }
+    }
+  </script>
+</body>
+</html>
