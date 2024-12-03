@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Do Not Press</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+    }
+    .red-button {
+      background-color: red;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .hidden {
+      display: none;
+    }
+    #video-container {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <button id="red-button" class="red-button">Do not press</button>
+  <div id="stage-1" class="hidden">
+    <p>Are you sure?</p>
+    <button id="yes-1">Yes</button>
+    <button id="nah">Nah</button>
+  </div>
+  <div id="stage-2" class="hidden">
+    <p>If you're so sure, then click yes</p>
+    <p>This may kill you, are you ACTUALLY sure?</p>
+    <button id="yes-2">Yes</button>
+  </div>
+  <div id="stage-3" class="hidden">
+    <p>Fine</p>
+    <button id="final-red-button" class="red-button">Do not press</button>
+  </div>
+  <div id="video-container" class="hidden">
+    <video controls autoplay>
+      <source src="joke.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+
+  <script>
+    const redButton = document.getElementById("red-button");
+    const stage1 = document.getElementById("stage-1");
+    const stage2 = document.getElementById("stage-2");
+    const stage3 = document.getElementById("stage-3");
+    const videoContainer = document.getElementById("video-container");
+
+    redButton.addEventListener("click", () => {
+      redButton.classList.add("hidden");
+      stage1.classList.remove("hidden");
+    });
+
+    document.getElementById("yes-1").addEventListener("click", () => {
+      stage1.classList.add("hidden");
+      stage2.classList.remove("hidden");
+    });
+
+    document.getElementById("nah").addEventListener("click", () => {
+      alert("Wise choice.");
+    });
+
+    document.getElementById("yes-2").addEventListener("click", () => {
+      stage2.classList.add("hidden");
+      stage3.classList.remove("hidden");
+    });
+
+    document.getElementById("final-red-button").addEventListener("click", () => {
+      document.body.innerHTML = ""; // Clear everything
+      videoContainer.classList.remove("hidden");
+    });
+  </script>
+</body>
+</html>
