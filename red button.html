@@ -76,7 +76,9 @@
     });
 
     document.getElementById("final-red-button").addEventListener("click", () => {
-      document.body.innerHTML = ""; // Clear everything
+      // Hide everything except the video container
+      document.body.innerHTML = ""; 
+      document.body.appendChild(videoContainer);
       videoContainer.classList.remove("hidden");
     });
   </script>
